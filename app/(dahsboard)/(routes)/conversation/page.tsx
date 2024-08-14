@@ -1,11 +1,11 @@
 "use client";
 
+import runGemini from "@/app/api/conversation/gemini";
 import { Heading } from "@/components/heading";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,10 +15,7 @@ import { formSchema } from "./constants";
 
 const ConversationPage = () => {
   const router = useRouter();
-  const [messages, setMessages] = useState<any>([
-    "2 + 2 is 4",
-    "sun is yellow",
-  ]);
+  const [messages, setMessages] = useState<any>([]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,12 +31,13 @@ const ConversationPage = () => {
         role: "user",
         content: values.prompt,
       };
-      const newMessage = [...messages, userMessage];
 
-      const response = await axios.post("/api/conversation", {
-        messages: newMessage,
-      });
-      setMessages((cur: any) => [...cur, userMessage, response.data]);
+      // const response = await axios.post("/api/conversation", {
+      //   messages: newMessage,
+      // });
+
+      let output = runGemini(values.prompt);
+      setMessages((cur: string[]) => [...cur, output, values.prompt]);
 
       form.reset();
     } catch (error: any) {
@@ -70,9 +68,9 @@ const ConversationPage = () => {
                 <FormItem className="col-span-12 lg:col-span-10">
                   <FormControl className="m-0 p-0">
                     <Input
-                      className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
+                      className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent p-3"
                       disabled={isLoading}
-                      placeholder="2 + 2 = ?"
+                      placeholder="Who is the PM of India?"
                       {...field}
                     />
                   </FormControl>
@@ -83,14 +81,20 @@ const ConversationPage = () => {
               className="col-span-12 lg:col-span-2 w-full"
               disabled={isLoading}
             >
-              Generate
+              {!isLoading ? "Generate" : "Generating..."}
             </Button>
           </form>
         </Form>
         <div className="space-y-4 mt-4">
           <div className="flex flex-col-reverse gap-y-4">
-            {messages.map((message: any) => (
-              <div key={message}>{message}</div>
+            {isLoading && <div></div>}
+            {messages.length === 0 && !isLoading && (
+              <p className="h-full w-full flex justify-center items-center">
+                No conversation started.
+              </p>
+            )}
+            {messages.map((message: any, index: number) => (
+              <div key={message + index}>{message}</div>
             ))}
           </div>
         </div>

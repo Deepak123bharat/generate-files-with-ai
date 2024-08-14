@@ -1,5 +1,5 @@
-import Editor from "./(collection)/editor";
-import Template from "./(collection)/template";
+import Editor from "@/components/code/editor";
+import Template from "@/components/code/template";
 
 const Page = () => {
   return (
