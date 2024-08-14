@@ -1,11 +1,7 @@
-"use client";
+interface Props {}
 
-import CreateForm from "./(custom)/CreateForm";
-
-interface PageProps {}
-
-const Page = ({}: PageProps) => {
-  return <CreateForm />;
+const Page = ({}: Props) => {
+  return <h1>7</h1>;
 };
 
 export default Page;
